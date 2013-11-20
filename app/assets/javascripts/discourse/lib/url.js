@@ -133,15 +133,20 @@ Discourse.URL = Em.Object.createWithMixins({
         Discourse.URL.replaceState(path);
 
         var topicController = Discourse.__container__.lookup('controller:topic'),
-            opts = {};
+            opts = {},
+            postStream = topicController.get('postStream');
 
         if (newMatches[3]) opts.nearPost = newMatches[3];
-        var postStream = topicController.get('postStream');
+        var closest = opts.nearPost || 1;
+
         postStream.refresh(opts).then(function() {
           topicController.setProperties({
-            currentPost: opts.nearPost || 1,
-            progressPosition: opts.nearPost || 1
+            currentPost: closest,
+            progressPosition: closest,
+            highlightOnInsert: closest
           });
+        }).then(function() {
+          Discourse.TopicView.jumpToPost(closest);
         });
 
         // Abort routing, we have replaced our state.

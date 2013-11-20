@@ -459,6 +459,39 @@ Discourse.TopicController = Discourse.ObjectController.extend(Discourse.Selected
       }
       return true;
     }
+  },
+
+  topVisibleChanged: function(post) {
+    var postStream = this.get('postStream'),
+        firstLoadedPost = postStream.get('firstLoadedPost');
+
+    if (firstLoadedPost && firstLoadedPost === post) {
+
+      // Note: jQuery shouldn't be done in a controller, but how else can we
+      // trigger a scroll after a promise resolves in a controller? We need
+      // to do this to preserve upwards infinte scrolling.
+      var $body = $('body'),
+          $elem = $('#post-cloak-' + post.get('post_number')),
+          distToElement = $body.scrollTop() - $elem.position().top;
+
+      postStream.prependMore().then(function() {
+        Em.run.next(function () {
+          $elem = $('#post-cloak-' + post.get('post_number'));
+          $('html, body').scrollTop($elem.position().top + distToElement);
+        });
+      });
+    }
+  },
+
+  bottomVisibleChanged: function(post) {
+    this.set('progressPosition', post.get('post_number'));
+
+    var postStream = this.get('postStream'),
+        lastLoadedPost = postStream.get('lastLoadedPost');
+
+    if (lastLoadedPost && lastLoadedPost === post) {
+      postStream.appendMore();
+    }
   }
 
 

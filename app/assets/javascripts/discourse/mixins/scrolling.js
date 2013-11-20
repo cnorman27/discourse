@@ -18,16 +18,16 @@ Discourse.Scrolling = Em.Mixin.create({
   bindScrolling: function(opts) {
     opts = opts || {debounce: 100};
 
-    var scrollingMixin = this;
-    var onScrollMethod;
+    var self = this,
+        onScrollMethod;
 
     if (opts.debounce) {
       onScrollMethod = Discourse.debounce(function() {
-        return scrollingMixin.scrolled();
+        return self.scrolled();
       }, opts.debounce);
     } else {
       onScrollMethod = function() {
-        return scrollingMixin.scrolled();
+        return self.scrolled();
       };
     }
 
